@@ -1,6 +1,7 @@
+const axios = require("axios");
 const db = require("../models");
 
-// Defining methods for the booksController
+// Defining methods for the articlesController
 module.exports = {
   findAll: function(req, res) {
     db.Article
@@ -33,5 +34,13 @@ module.exports = {
       .then(dbModel => dbModel.remove())
       .then(dbModel => res.json(dbModel))
       .catch(err => res.status(422).json(err));
-  }
+  },
+  queryNYT: function(req, res) {
+    console.log(req);
+    console.log(req.params);
+    console.log("https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=b9f91d369ff59547cd47b931d8cbc56b:0:74623931&q=" + req.params.queryObj[0] + req.params.queryObj[1] + req.params.queryObj[2]);
+    axios.get("https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=b9f91d369ff59547cd47b931d8cbc56b:0:74623931&q=" + req.params.queryObj[0] + req.params.queryObj[1] + req.params.queryObj[2])
+    .then(NYTData => res.json(NYTData.data.response.docs))
+    .catch(err => res.status(422).json(err));
+  }  
 };

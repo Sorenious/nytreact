@@ -13,4 +13,9 @@ router
   .put(articlesController.update)
   .delete(articlesController.remove);
 
+// Matches with "/api/articles/:id"
+router
+  .route("/query/:queryObj")
+  .get(articlesController.queryNYT);
+
 module.exports = router;

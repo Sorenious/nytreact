@@ -5,6 +5,10 @@ export default {
   getArticles: function() {
     return axios.get("/api/articles");
   },
+  // Gets all articles
+  getNYTArticles: function(queryObj) {
+    return axios.get("/api/articles/query/" + queryObj);
+  },
   // Gets the article with the given id
   getArticle: function(id) {
     return axios.get("/api/articles/" + id);

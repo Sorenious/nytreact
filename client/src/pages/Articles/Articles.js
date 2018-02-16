@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import { Col, Row, Container } from "../../components/Grid";
 import { List, ListItem } from "../../components/List";
 import { Input, TextArea, FormBtn, Select } from "../../components/Form";
-import axios from "axios";
 
 class Articles extends Component {
   state = {
@@ -21,27 +20,24 @@ class Articles extends Component {
     articleCounter: 0
   };
 
-  componentDidMount() {
-    this.loadArticles();
-  }
+  // componentDidMount() {
+  //   this.loadArticles();
+  // }
 
-  runQuery = (numArticles, queryURL) => {
-
-  // The AJAX function uses the queryURL and GETS the JSON data associated with it.
+  runQuery = (numArticles, queryObj) => {
+    let newArticles = [];
+  // The AJAX function uses the query and GETS the JSON data associated with it.
   // The data then gets stored in the variable called: "NYTData"
-  console.log(queryURL);
-  axios.get({
-    url: queryURL,
-    method: "GET"
-  }).then(function(NYTData) {
+  console.log(queryObj);
+  API.getNYTArticles(queryObj).then(res => {
 
     // Logging the URL so we have access to it for troubleshooting
     console.log("------------------------------------");
-    console.log("URL: " + queryURL);
+    console.log("URL: " + queryObj);
     console.log("------------------------------------");
 
     // Log the NYTData to console, where it will show up as an object
-    console.log(NYTData);
+    console.log(res.data);
     console.log("------------------------------------");
 
     // Loop through and provide the correct number of articles
@@ -95,17 +91,21 @@ class Articles extends Component {
     //   console.log(NYTData.response.docs[i].section_name);
     //   console.log(NYTData.response.docs[i].web_url);
     // }
-  });
-
+     
+    this.setState({ articles: res.data, search: "", records: "", start: "", end: "" })
+    console.log(this.state.articles);
+    
+  })
+    .catch(err => console.log(err));
 }
 
-  loadArticles = () => {
-    API.getArticles()
-      .then(res =>
-        this.setState({ articles: res.data, search: "", records: "", synopsis: "" })
-      )
-      .catch(err => console.log(err));
-  };
+  // loadArticles = () => {
+  //   API.getArticles()
+  //     .then(res =>
+  //       this.setState({ articles: res.data, search: "", records: "", synopsis: "" })
+  //     )
+  //     .catch(err => console.log(err));
+  // };
 
   deleteArticle = id => {
     API.deleteArticle(id)
@@ -135,18 +135,25 @@ class Articles extends Component {
       var searchURL = this.state.queryURLBase + this.state.search;
       console.log(searchURL, this.state.search);
       // If the user provides a startYear -- the startYear will be included in the queryURL
+      let startDate = "";
+      let endDate = "";
       if (parseInt(this.state.start)) {
-        searchURL = searchURL + "&begin_date=" + this.state.start + "0101";
+        startDate = "&begin_date=" + this.state.start + "0101";
       }
 
       // If the user provides a startYear -- the endYear will be included in the queryURL
       if (parseInt(this.state.end)) {
-        searchURL = searchURL + "&end_date=" +this.state.end + "0101";
+        endDate = "&end_date=" +this.state.end + "1212";
       }
 
       // Then we will pass the final searchURL and the number of results to
       // include to the runQuery function
-      this.runQuery(this.state.records, searchURL);
+      this.runQuery(this.state.records, 
+        [
+          this.state.search, 
+          startDate, 
+          endDate
+        ]);
     }
   };
 
@@ -218,7 +225,7 @@ class Articles extends Component {
                     <ListItem key={article._id}>
                       <Link to={"/articles/" + article._id}>
                         <strong>
-                          {article.search} by {article.records}
+                          {article.headline.main} on {article.pub_date}
                         </strong>
                       </Link>
                       <DeleteBtn onClick={() => this.deleteArticle(article._id)} />
